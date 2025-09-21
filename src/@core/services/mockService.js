@@ -131,6 +131,110 @@ export const mockOrders = [
   },
 ]
 
+// Données mock pour les tenants
+export const mockTenants = [
+  {
+    id: 'tenant-001',
+    name: 'Acme Corporation',
+    domain: 'https://acme.example.com',
+    status: 'active',
+    email: 'admin@acme.example.com',
+    phone: '+1-555-0123',
+    address: '123 Business Ave, Tech City, TC 12345',
+    plan: 'enterprise',
+    maxUsers: 100,
+    currentUsers: 45,
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-09-20T14:22:00Z',
+    features: ['analytics', 'api_access', 'custom_domain', 'priority_support'],
+    billingInfo: {
+      monthlyRevenue: 2500.00,
+      nextBillingDate: '2024-10-15T00:00:00Z',
+      paymentMethod: 'credit_card'
+    }
+  },
+  {
+    id: 'tenant-002', 
+    name: 'TechStart Solutions',
+    domain: 'https://techstart.example.com',
+    status: 'active',
+    email: 'contact@techstart.example.com',
+    phone: '+1-555-0456',
+    address: '456 Innovation Blvd, Startup Valley, SV 67890',
+    plan: 'professional',
+    maxUsers: 25,
+    currentUsers: 18,
+    createdAt: '2024-03-22T09:15:00Z',
+    updatedAt: '2024-09-18T11:45:00Z',
+    features: ['analytics', 'api_access', 'custom_domain'],
+    billingInfo: {
+      monthlyRevenue: 750.00,
+      nextBillingDate: '2024-10-22T00:00:00Z',
+      paymentMethod: 'bank_transfer'
+    }
+  },
+  {
+    id: 'tenant-003',
+    name: 'Global Retail Inc',
+    domain: 'https://globalretail.example.com', 
+    status: 'inactive',
+    email: 'support@globalretail.example.com',
+    phone: '+1-555-0789',
+    address: '789 Commerce St, Retail City, RC 13579',
+    plan: 'basic',
+    maxUsers: 10,
+    currentUsers: 3,
+    createdAt: '2024-02-10T16:20:00Z',
+    updatedAt: '2024-08-30T13:10:00Z',
+    features: ['analytics'],
+    billingInfo: {
+      monthlyRevenue: 199.00,
+      nextBillingDate: '2024-10-10T00:00:00Z',
+      paymentMethod: 'credit_card'
+    }
+  },
+  {
+    id: 'tenant-004',
+    name: 'Creative Agency Pro',
+    domain: 'https://creativeagency.example.com',
+    status: 'suspended',
+    email: 'hello@creativeagency.example.com',
+    phone: '+1-555-0321',
+    address: '321 Design Lane, Art District, AD 24680',
+    plan: 'professional',
+    maxUsers: 25,
+    currentUsers: 12,
+    createdAt: '2024-05-05T12:00:00Z',
+    updatedAt: '2024-09-15T09:30:00Z',
+    features: ['analytics', 'api_access'],
+    billingInfo: {
+      monthlyRevenue: 750.00,
+      nextBillingDate: '2024-10-05T00:00:00Z',
+      paymentMethod: 'paypal'
+    }
+  },
+  {
+    id: 'tenant-005',
+    name: 'HealthTech Innovations',
+    domain: 'https://healthtech.example.com',
+    status: 'active',
+    email: 'info@healthtech.example.com',
+    phone: '+1-555-0654',
+    address: '654 Medical Plaza, Health City, HC 97531',
+    plan: 'enterprise',
+    maxUsers: 200,
+    currentUsers: 87,
+    createdAt: '2024-01-08T08:45:00Z',
+    updatedAt: '2024-09-21T16:15:00Z',
+    features: ['analytics', 'api_access', 'custom_domain', 'priority_support', 'compliance_tools'],
+    billingInfo: {
+      monthlyRevenue: 4200.00,
+      nextBillingDate: '2024-10-08T00:00:00Z',
+      paymentMethod: 'bank_transfer'
+    }
+  }
+]
+
 // Données mock pour les analytics
 export const mockAnalytics = {
   overview: {
@@ -228,6 +332,134 @@ class MockService {
     logger.debug('Fetching Analytics (mock)')
     return {
       data: mockAnalytics,
+      success: true,
+    }
+  }
+
+  // Tenants
+  async getTenants(params = {}) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Tenants (mock)', params)
+    
+    let result = [...mockTenants]
+    
+    // Filtrage par statut
+    if (params.status) {
+      result = result.filter(tenant => tenant.status === params.status)
+    }
+    
+    // Recherche par nom
+    if (params.search) {
+      const searchTerm = params.search.toLowerCase()
+      result = result.filter(tenant => 
+        tenant.name.toLowerCase().includes(searchTerm) ||
+        tenant.domain.toLowerCase().includes(searchTerm) ||
+        tenant.email.toLowerCase().includes(searchTerm)
+      )
+    }
+    
+    // Pagination
+    const page = parseInt(params.page) || 1
+    const limit = parseInt(params.limit) || 10
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    
+    return {
+      data: result.slice(startIndex, endIndex),
+      total: result.length,
+      page,
+      limit,
+      totalPages: Math.ceil(result.length / limit),
+      success: true,
+    }
+  }
+
+  async getTenant(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Tenant (mock)', { id })
+    
+    const tenant = mockTenants.find(t => t.id === id)
+    if (!tenant) {
+      throw new Error('Tenant not found')
+    }
+    
+    return {
+      data: tenant,
+      success: true,
+    }
+  }
+
+  async createTenant(tenantData) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay(1500)
+    logger.debug('Creating Tenant (mock)', tenantData)
+    
+    const newTenant = {
+      id: `tenant-${Date.now()}`,
+      ...tenantData,
+      status: tenantData.status || 'active',
+      currentUsers: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      features: tenantData.features || ['analytics'],
+      billingInfo: {
+        monthlyRevenue: 0,
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        paymentMethod: tenantData.billingInfo?.paymentMethod || 'credit_card'
+      }
+    }
+    
+    // Ajouter à la liste mock (simulation)
+    mockTenants.push(newTenant)
+    
+    return {
+      data: newTenant,
+      success: true,
+    }
+  }
+
+  async updateTenant(id, updates) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Updating Tenant (mock)', { id, updates })
+    
+    const index = mockTenants.findIndex(t => t.id === id)
+    if (index === -1) {
+      throw new Error('Tenant not found')
+    }
+    
+    mockTenants[index] = {
+      ...mockTenants[index],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+    
+    return {
+      data: mockTenants[index],
+      success: true,
+    }
+  }
+
+  async deleteTenant(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Deleting Tenant (mock)', { id })
+    
+    const index = mockTenants.findIndex(t => t.id === id)
+    if (index === -1) {
+      throw new Error('Tenant not found')
+    }
+    
+    mockTenants.splice(index, 1)
+    
+    return {
       success: true,
     }
   }

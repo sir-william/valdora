@@ -56,7 +56,12 @@ const autoDetectedNavigation = [
         href: '/admin/user-management', 
         icon: <AdminIcon />, 
         enabled: true,
-        badge: 'Auto-détecté'
+        badge: 'Auto-détecté',
+        children: [
+          { label: 'Utilisateurs', href: '/admin/user-management/users' },
+          { label: 'Rôles', href: '/admin/user-management/roles' },
+          { label: 'Permissions', href: '/admin/user-management/permissions' }
+        ]
       }
     ]
   },
@@ -100,7 +105,13 @@ const SimpleSidebar = ({ open = true, onClose }) => {
   const renderNavigationItem = (item, isChild = false) => (
     <ListItem key={item.href} disablePadding sx={{ pl: isChild ? 4 : 0 }}>
       <ListItemButton
-        onClick={() => handleNavigation(item.href)}
+        onClick={() => {
+          if (item.children && !isChild) {
+            toggleSection(item.label)
+          } else {
+            handleNavigation(item.href)
+          }
+        }}
         sx={{
           borderRadius: 1,
           mx: 1,

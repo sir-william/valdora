@@ -46,7 +46,21 @@ const verticalMenuData = () => [
     label: 'Gestion Utilisateurs',
     href: '/admin/user-management',
     icon: 'tabler-users-group',
-    badge: { label: 'Auto-détecté', color: 'success' }
+    badge: { label: 'Auto-détecté', color: 'success' },
+    children: [
+      {
+        label: 'Utilisateurs',
+        href: '/admin/user-management/users'
+      },
+      {
+        label: 'Rôles',
+        href: '/admin/user-management/roles'
+      },
+      {
+        label: 'Permissions',
+        href: '/admin/user-management/permissions'
+      }
+    ]
   },
   {
     label: 'About',

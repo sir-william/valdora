@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { CssBaseline, Box } from '@mui/material'
 import { store } from '../redux-store/store'
+import MainLayout from '../components/layout/MainLayout'
 
 // Third-party Imports
 import 'react-perfect-scrollbar/dist/css/styles.css'
@@ -105,16 +106,9 @@ const RootLayout = ({ children }) => {
         <Provider store={store}>
           <ThemeProvider theme={valdoraTheme}>
             <CssBaseline />
-            <Box
-              sx={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                bgcolor: 'background.default',
-              }}
-            >
+            <MainLayout>
               {children}
-            </Box>
+            </MainLayout>
           </ThemeProvider>
         </Provider>
       </body>

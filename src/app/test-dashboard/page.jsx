@@ -18,7 +18,7 @@ import {
   Chip,
 } from '@mui/material'
 import { motion } from 'framer-motion'
-import MainLayout from '../../@core/components/layout/MainLayout'
+
 import DashboardAnalytics from '../../components/dashboard/DashboardAnalytics'
 import { config, logger } from '../../@core/utils/config'
 
@@ -90,8 +90,7 @@ const TestDashboardPage = () => {
   }
 
   return (
-    <MainLayout>
-      <Container maxWidth="xl" sx={{ py: 2 }}>
+    <Container maxWidth="xl" sx={{ py: 2 }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -326,7 +325,6 @@ const TestDashboardPage = () => {
           </Typography>
         </Box>
       </Container>
-    </MainLayout>
   )
 }
 

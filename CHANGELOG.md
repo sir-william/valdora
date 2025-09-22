@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.0.1] - 2025-09-22
+
+### 🐛 Corrections Critiques
+- **Fix Layout**: Résolution du problème de sidebar navigation dans dashboard et test-dashboard
+- **Fix Double Layout**: Suppression des layouts dupliqués causant des conflits d'affichage  
+- **Fix Navigation**: Sidebar maintenant visible et fonctionnelle sur toutes les pages
+- **Fix Auto-Detection**: Badges "Auto-détecté" maintenant visibles correctement
+
+### 📊 Améliorations
+- **Performance**: Réduction de la taille du bundle grâce à la suppression des layouts dupliqués
+- **UX**: Navigation cohérente et professionnelle sur toutes les pages
+- **Architecture**: Structure de layout simplifiée et maintenable
+
+### 📚 Documentation
+- **Layout Fix Guide**: Documentation complète du fix de layout (LAYOUT_FIX_DOCUMENTATION.md)
+- **Troubleshooting**: Guide de dépannage pour les problèmes de layout futurs
+- **Best Practices**: Bonnes pratiques pour la création de nouvelles pages
+
+## [1.0.0] - 2025-09-22
 
 ### Added
 - **Tenant Management Module**: A comprehensive module for managing tenants has been added under the `/admin/tenants` route.

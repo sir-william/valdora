@@ -1,6 +1,5 @@
 const nextConfig = {
-  // Temporarily disable export for development testing
-  // output: "export",
+  output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
   experimental: {

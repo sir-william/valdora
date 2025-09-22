@@ -1,5 +1,20 @@
 'use client'
 
+// Configuration de navigation pour la détection automatique
+export const navigationConfig = {
+  enabled: true,
+  section: 'Administration',
+  label: 'Tenants',
+  icon: 'tabler-building',
+  order: 100,
+  permissions: ['admin'],
+  featureFlag: 'TENANTS',
+  children: [
+    { label: 'Liste des tenants', href: '/admin/tenants' },
+    { label: 'Nouveau tenant', href: '/admin/tenants/new' }
+  ]
+}
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {

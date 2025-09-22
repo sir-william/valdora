@@ -25,7 +25,23 @@ const baseQueryWithMocks = async (args, api, extraOptions) => {
           return { data: await mockService.getOrders() }
         case '/analytics':
           return { data: await mockService.getAnalytics() }
+        case '/tenants':
+          if (args.method === 'POST') {
+            return { data: await mockService.createTenant(args.body) }
+          }
+          return { data: await mockService.getTenants(args.params) }
         default:
+          // Gestion des endpoints dynamiques pour les tenants
+          if (endpoint.startsWith('/tenants/')) {
+            const tenantId = endpoint.replace('/tenants/', '')
+            if (args.method === 'PUT') {
+              return { data: await mockService.updateTenant(tenantId, args.body) }
+            } else if (args.method === 'DELETE') {
+              return { data: await mockService.deleteTenant(tenantId) }
+            } else {
+              return { data: await mockService.getTenant(tenantId) }
+            }
+          }
           logger.warn('No mock implementation for:', endpoint)
           return { error: { status: 'MOCK_NOT_IMPLEMENTED', data: 'Mock not implemented for this endpoint' } }
       }
@@ -54,7 +70,7 @@ const baseQueryWithMocks = async (args, api, extraOptions) => {
 export const valdoraApiWithMocks = createApi({
   reducerPath: 'valdoraApiWithMocks',
   baseQuery: baseQueryWithMocks,
-  tagTypes: ['AiStoreDraft', 'Order', 'User', 'Analytics'],
+  tagTypes: ['AiStoreDraft', 'Order', 'User', 'Analytics', 'Tenant'],
   endpoints: (builder) => ({
     // Authentication
     login: builder.mutation({
@@ -115,6 +131,53 @@ export const valdoraApiWithMocks = createApi({
       }),
       providesTags: ['Analytics'],
     }),
+    
+    // Tenants
+    getTenants: builder.query({
+      query: (params = {}) => ({
+        endpoint: '/tenants',
+        url: '/tenants',
+        params,
+      }),
+      providesTags: ['Tenant'],
+    }),
+    
+    getTenant: builder.query({
+      query: (id) => ({
+        endpoint: `/tenants/${id}`,
+        url: `/tenants/${id}`,
+      }),
+      providesTags: (result, error, id) => [{ type: 'Tenant', id }],
+    }),
+    
+    createTenant: builder.mutation({
+      query: (tenant) => ({
+        endpoint: '/tenants',
+        url: '/tenants',
+        method: 'POST',
+        body: tenant,
+      }),
+      invalidatesTags: ['Tenant'],
+    }),
+    
+    updateTenant: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        endpoint: `/tenants/${id}`,
+        url: `/tenants/${id}`,
+        method: 'PUT',
+        body: patch,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Tenant', id }],
+    }),
+    
+    deleteTenant: builder.mutation({
+      query: (id) => ({
+        endpoint: `/tenants/${id}`,
+        url: `/tenants/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Tenant'],
+    }),
   }),
 })
 
@@ -125,4 +188,9 @@ export const {
   useCreateAiStoreDraftMutation,
   useGetOrdersQuery,
   useGetAnalyticsQuery,
+  useGetTenantsQuery,
+  useGetTenantQuery,
+  useCreateTenantMutation,
+  useUpdateTenantMutation,
+  useDeleteTenantMutation,
 } = valdoraApiWithMocks

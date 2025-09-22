@@ -965,3 +965,362 @@ class MockService {
 
 export const mockService = new MockService()
 export default mockService
+
+
+// ===================================
+// TOPNAV MOCK SERVICES
+// ===================================
+
+// Mock user data for TopNav
+export const mockCurrentUser = {
+  id: 1,
+  name: 'John Doe',
+  email: 'john.doe@valdora.com',
+  role: 'Administrator',
+  avatarUrl: null,
+  status: 'online',
+  locale: 'fr',
+  theme: 'system',
+  billingAlerts: 4,
+  lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+  permissions: ['admin', 'user_management', 'billing', 'analytics']
+}
+
+// Mock notifications data
+export const mockNotifications = [
+  {
+    id: 1,
+    title: 'Nouveau tenant enregistré',
+    body: 'TechCorp s\'est inscrit avec succès et attend votre approbation.',
+    type: 'info',
+    read: false,
+    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+    url: '/admin/tenants/1',
+    category: 'tenant'
+  },
+  {
+    id: 2,
+    title: 'Paiement reçu',
+    body: 'Paiement mensuel de 99€ reçu de DataFlow Inc.',
+    type: 'success',
+    read: false,
+    timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+    url: '/billing/payments',
+    category: 'billing'
+  },
+  {
+    id: 3,
+    title: 'Maintenance système',
+    body: 'La maintenance programmée commencera à 2h00 UTC ce soir.',
+    type: 'warning',
+    read: true,
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    category: 'system'
+  },
+  {
+    id: 4,
+    title: 'Limite API dépassée',
+    body: 'Le client "MobileApp" a dépassé la limite de taux API.',
+    type: 'error',
+    read: false,
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+    url: '/admin/api-logs',
+    category: 'api'
+  },
+  {
+    id: 5,
+    title: 'Nouvelle fonctionnalité disponible',
+    body: 'Le tableau de bord analytique avancé est maintenant disponible.',
+    type: 'info',
+    read: true,
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    url: '/features/analytics',
+    category: 'feature'
+  },
+  {
+    id: 6,
+    title: 'Sauvegarde terminée',
+    body: 'La sauvegarde quotidienne s\'est terminée avec succès.',
+    type: 'success',
+    read: true,
+    timestamp: new Date(Date.now() - 36 * 60 * 60 * 1000), // 1.5 days ago
+    category: 'system'
+  }
+]
+
+// Mock billing alerts
+export const mockBillingAlerts = [
+  {
+    id: 1,
+    type: 'payment_due',
+    title: 'Paiement en attente',
+    message: 'Votre facture de 99€ est due dans 3 jours.',
+    severity: 'warning',
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 2,
+    type: 'usage_limit',
+    title: 'Limite d\'utilisation atteinte',
+    message: 'Vous avez utilisé 90% de votre quota mensuel.',
+    severity: 'info',
+    usage: 90
+  },
+  {
+    id: 3,
+    type: 'card_expiry',
+    title: 'Carte expirée',
+    message: 'Votre carte de crédit expire ce mois-ci.',
+    severity: 'error',
+    expiryDate: new Date(2024, 11, 31)
+  },
+  {
+    id: 4,
+    type: 'subscription_renewal',
+    title: 'Renouvellement automatique',
+    message: 'Votre abonnement sera renouvelé automatiquement.',
+    severity: 'info',
+    renewalDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  }
+]
+
+// TopNav Mock Service Class
+export class TopNavMockService {
+  constructor() {
+    this.notifications = [...mockNotifications]
+    this.user = { ...mockCurrentUser }
+    this.billingAlerts = [...mockBillingAlerts]
+  }
+
+  // User methods
+  async getCurrentUser() {
+    await mockDelay()
+    logger.info('TopNavMockService: Fetching current user')
+    return {
+      success: true,
+      data: this.user
+    }
+  }
+
+  async updateUserProfile(updates) {
+    await mockDelay()
+    logger.info('TopNavMockService: Updating user profile', updates)
+    
+    this.user = { ...this.user, ...updates }
+    return {
+      success: true,
+      data: this.user
+    }
+  }
+
+  async updateUserPreferences(preferences) {
+    await mockDelay()
+    logger.info('TopNavMockService: Updating user preferences', preferences)
+    
+    this.user = { ...this.user, ...preferences }
+    
+    // Persist theme and locale to localStorage
+    if (preferences.theme) {
+      localStorage.setItem('theme', preferences.theme)
+    }
+    if (preferences.locale) {
+      localStorage.setItem('locale', preferences.locale)
+    }
+    
+    return {
+      success: true,
+      data: this.user
+    }
+  }
+
+  // Notifications methods
+  async getNotifications(params = {}) {
+    await mockDelay()
+    logger.info('TopNavMockService: Fetching notifications', params)
+    
+    let filtered = [...this.notifications]
+    
+    // Filter by read status
+    if (params.unread === true) {
+      filtered = filtered.filter(n => !n.read)
+    }
+    
+    // Filter by category
+    if (params.category) {
+      filtered = filtered.filter(n => n.category === params.category)
+    }
+    
+    // Sort by timestamp (newest first)
+    filtered.sort((a, b) => b.timestamp - a.timestamp)
+    
+    // Pagination
+    const page = params.page || 1
+    const limit = params.limit || 10
+    const start = (page - 1) * limit
+    const end = start + limit
+    const paginatedResults = filtered.slice(start, end)
+    
+    return {
+      success: true,
+      data: {
+        notifications: paginatedResults,
+        total: filtered.length,
+        unreadCount: this.notifications.filter(n => !n.read).length,
+        page,
+        limit,
+        hasMore: end < filtered.length
+      }
+    }
+  }
+
+  async markNotificationAsRead(notificationId) {
+    await mockDelay()
+    logger.info('TopNavMockService: Marking notification as read', notificationId)
+    
+    const notification = this.notifications.find(n => n.id === notificationId)
+    if (notification) {
+      notification.read = true
+      return {
+        success: true,
+        data: notification
+      }
+    }
+    
+    return {
+      success: false,
+      error: 'Notification not found'
+    }
+  }
+
+  async markAllNotificationsAsRead() {
+    await mockDelay()
+    logger.info('TopNavMockService: Marking all notifications as read')
+    
+    const unreadCount = this.notifications.filter(n => !n.read).length
+    this.notifications.forEach(n => n.read = true)
+    
+    return {
+      success: true,
+      data: {
+        markedCount: unreadCount,
+        totalCount: this.notifications.length
+      }
+    }
+  }
+
+  async deleteNotification(notificationId) {
+    await mockDelay()
+    logger.info('TopNavMockService: Deleting notification', notificationId)
+    
+    const index = this.notifications.findIndex(n => n.id === notificationId)
+    if (index !== -1) {
+      const deleted = this.notifications.splice(index, 1)[0]
+      return {
+        success: true,
+        data: deleted
+      }
+    }
+    
+    return {
+      success: false,
+      error: 'Notification not found'
+    }
+  }
+
+  // Billing methods
+  async getBillingAlerts() {
+    await mockDelay()
+    logger.info('TopNavMockService: Fetching billing alerts')
+    
+    return {
+      success: true,
+      data: {
+        alerts: this.billingAlerts,
+        count: this.billingAlerts.length
+      }
+    }
+  }
+
+  async dismissBillingAlert(alertId) {
+    await mockDelay()
+    logger.info('TopNavMockService: Dismissing billing alert', alertId)
+    
+    const index = this.billingAlerts.findIndex(a => a.id === alertId)
+    if (index !== -1) {
+      const dismissed = this.billingAlerts.splice(index, 1)[0]
+      
+      // Update user billing alerts count
+      this.user.billingAlerts = this.billingAlerts.length
+      
+      return {
+        success: true,
+        data: dismissed
+      }
+    }
+    
+    return {
+      success: false,
+      error: 'Billing alert not found'
+    }
+  }
+
+  // Authentication methods
+  async logout() {
+    await mockDelay()
+    logger.info('TopNavMockService: User logout')
+    
+    // Clear localStorage
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('user')
+    
+    return {
+      success: true,
+      data: {
+        message: 'Logged out successfully'
+      }
+    }
+  }
+
+  // Real-time simulation methods
+  simulateNewNotification() {
+    const newNotification = {
+      id: Date.now(),
+      title: 'Nouvelle activité',
+      body: 'Quelque chose d\'intéressant s\'est produit dans votre application.',
+      type: 'info',
+      read: false,
+      timestamp: new Date(),
+      url: '/dashboard',
+      category: 'system'
+    }
+    
+    this.notifications.unshift(newNotification)
+    logger.info('TopNavMockService: Simulated new notification', newNotification)
+    
+    return newNotification
+  }
+
+  simulateUserStatusChange(status = 'online') {
+    this.user.status = status
+    logger.info('TopNavMockService: User status changed to', status)
+    return this.user
+  }
+}
+
+// Create singleton instance
+export const topNavMockService = new TopNavMockService()
+
+// Export individual methods for convenience
+export const {
+  getCurrentUser,
+  updateUserProfile,
+  updateUserPreferences,
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  getBillingAlerts,
+  dismissBillingAlert,
+  logout
+} = topNavMockService

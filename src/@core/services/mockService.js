@@ -494,6 +494,473 @@ class MockService {
     logger.debug('Logout (mock)')
     return { success: true }
   }
+
+  // ========== USER ROLE PERMISSION METHODS ==========
+
+  async getUsers(params = {}) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Users (mock)', params)
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    let users = mockUserRolePermissionData.users
+    
+    // Apply filters
+    if (params.search) {
+      const search = params.search.toLowerCase()
+      users = users.filter(user => 
+        user.email.toLowerCase().includes(search) ||
+        user.firstName?.toLowerCase().includes(search) ||
+        user.lastName?.toLowerCase().includes(search)
+      )
+    }
+    
+    if (params.isActive !== undefined) {
+      users = users.filter(user => user.isActive === params.isActive)
+    }
+    
+    if (params.isEmailVerified !== undefined) {
+      users = users.filter(user => user.isEmailVerified === params.isEmailVerified)
+    }
+    
+    // Apply pagination
+    const page = parseInt(params.page) || 1
+    const limit = parseInt(params.limit) || 10
+    const offset = (page - 1) * limit
+    const paginatedUsers = users.slice(offset, offset + limit)
+    
+    return {
+      data: paginatedUsers,
+      meta: {
+        total: users.length,
+        page,
+        limit,
+        totalPages: Math.ceil(users.length / limit)
+      },
+      success: true,
+    }
+  }
+
+  async getUser(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching User (mock)', { id })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const user = mockUserRolePermissionData.users.find(u => u.id === parseInt(id))
+    
+    if (!user) {
+      throw new Error('User not found')
+    }
+    
+    // Enrich with role and permission details
+    const userRoles = mockUserRolePermissionData.roles.filter(role => 
+      user.userRoles.includes(role.id)
+    )
+    
+    const allPermissions = []
+    userRoles.forEach(role => {
+      const rolePermissions = mockUserRolePermissionData.permissions.filter(permission =>
+        role.permissions.includes(permission.id)
+      )
+      allPermissions.push(...rolePermissions)
+    })
+    
+    const enrichedUser = {
+      ...user,
+      roleDetails: userRoles,
+      permissionDetails: allPermissions.filter((permission, index, self) =>
+        index === self.findIndex(p => p.id === permission.id)
+      )
+    }
+    
+    return {
+      data: enrichedUser,
+      success: true,
+    }
+  }
+
+  async createUser(userData) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Creating User (mock)', userData)
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    
+    const newUser = {
+      id: Date.now(),
+      ...userData,
+      isActive: userData.isActive !== undefined ? userData.isActive : true,
+      isEmailVerified: false,
+      emailVerifiedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastLoginAt: null,
+      userRoles: userData.userRoles || [5], // Default to ROLE_USER
+      stats: {
+        tenantsCount: 0,
+        ordersCount: 0,
+        addressesCount: 0,
+        rolesCount: userData.userRoles?.length || 1,
+        permissionsCount: 0
+      }
+    }
+    
+    return {
+      data: newUser,
+      success: true,
+    }
+  }
+
+  async updateUser(id, updates) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Updating User (mock)', { id, updates })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const user = mockUserRolePermissionData.users.find(u => u.id === parseInt(id))
+    
+    if (!user) {
+      throw new Error('User not found')
+    }
+    
+    const updatedUser = {
+      ...user,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+    
+    return {
+      data: updatedUser,
+      success: true,
+    }
+  }
+
+  async deleteUser(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Deleting User (mock)', { id })
+    
+    return {
+      success: true,
+    }
+  }
+
+  async getRoles(params = {}) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Roles (mock)', params)
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    let roles = mockUserRolePermissionData.roles
+    
+    // Apply filters
+    if (params.search) {
+      const search = params.search.toLowerCase()
+      roles = roles.filter(role => 
+        role.name.toLowerCase().includes(search) ||
+        role.description?.toLowerCase().includes(search)
+      )
+    }
+    
+    if (params.level) {
+      roles = roles.filter(role => role.level === params.level)
+    }
+    
+    if (params.isActive !== undefined) {
+      roles = roles.filter(role => role.isActive === params.isActive)
+    }
+    
+    // Apply pagination
+    const page = parseInt(params.page) || 1
+    const limit = parseInt(params.limit) || 10
+    const offset = (page - 1) * limit
+    const paginatedRoles = roles.slice(offset, offset + limit)
+    
+    return {
+      data: paginatedRoles,
+      meta: {
+        total: roles.length,
+        page,
+        limit,
+        totalPages: Math.ceil(roles.length / limit)
+      },
+      success: true,
+    }
+  }
+
+  async getRole(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Role (mock)', { id })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const role = mockUserRolePermissionData.roles.find(r => r.id === parseInt(id))
+    
+    if (!role) {
+      throw new Error('Role not found')
+    }
+    
+    // Enrich with permission details
+    const permissions = mockUserRolePermissionData.permissions.filter(permission =>
+      role.permissions.includes(permission.id)
+    )
+    
+    const enrichedRole = {
+      ...role,
+      permissionDetails: permissions
+    }
+    
+    return {
+      data: enrichedRole,
+      success: true,
+    }
+  }
+
+  async createRole(roleData) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Creating Role (mock)', roleData)
+    
+    const newRole = {
+      id: Date.now(),
+      ...roleData,
+      isActive: roleData.isActive !== undefined ? roleData.isActive : true,
+      isSystemRole: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      permissions: roleData.permissions || [],
+      usersCount: 0,
+      permissionsCount: roleData.permissions?.length || 0
+    }
+    
+    return {
+      data: newRole,
+      success: true,
+    }
+  }
+
+  async updateRole(id, updates) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Updating Role (mock)', { id, updates })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const role = mockUserRolePermissionData.roles.find(r => r.id === parseInt(id))
+    
+    if (!role) {
+      throw new Error('Role not found')
+    }
+    
+    const updatedRole = {
+      ...role,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+      permissionsCount: updates.permissions?.length || role.permissions.length
+    }
+    
+    return {
+      data: updatedRole,
+      success: true,
+    }
+  }
+
+  async deleteRole(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Deleting Role (mock)', { id })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const role = mockUserRolePermissionData.roles.find(r => r.id === parseInt(id))
+    
+    if (!role) {
+      throw new Error('Role not found')
+    }
+    
+    if (role.isSystemRole) {
+      throw new Error('Cannot delete system role')
+    }
+    
+    return {
+      success: true,
+    }
+  }
+
+  async getPermissions(params = {}) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Permissions (mock)', params)
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    let permissions = mockUserRolePermissionData.permissions
+    
+    // Apply filters
+    if (params.search) {
+      const search = params.search.toLowerCase()
+      permissions = permissions.filter(permission => 
+        permission.name.toLowerCase().includes(search) ||
+        permission.description?.toLowerCase().includes(search)
+      )
+    }
+    
+    if (params.category) {
+      permissions = permissions.filter(permission => permission.category === params.category)
+    }
+    
+    if (params.action) {
+      permissions = permissions.filter(permission => permission.action === params.action)
+    }
+    
+    if (params.isActive !== undefined) {
+      permissions = permissions.filter(permission => permission.isActive === params.isActive)
+    }
+    
+    // Apply pagination
+    const page = parseInt(params.page) || 1
+    const limit = parseInt(params.limit) || 10
+    const offset = (page - 1) * limit
+    const paginatedPermissions = permissions.slice(offset, offset + limit)
+    
+    return {
+      data: paginatedPermissions,
+      meta: {
+        total: permissions.length,
+        page,
+        limit,
+        totalPages: Math.ceil(permissions.length / limit)
+      },
+      success: true,
+    }
+  }
+
+  async getPermission(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Fetching Permission (mock)', { id })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const permission = mockUserRolePermissionData.permissions.find(p => p.id === parseInt(id))
+    
+    if (!permission) {
+      throw new Error('Permission not found')
+    }
+    
+    return {
+      data: permission,
+      success: true,
+    }
+  }
+
+  async createPermission(permissionData) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Creating Permission (mock)', permissionData)
+    
+    const newPermission = {
+      id: Date.now(),
+      ...permissionData,
+      isActive: permissionData.isActive !== undefined ? permissionData.isActive : true,
+      createdAt: new Date().toISOString(),
+      rolesCount: 0
+    }
+    
+    return {
+      data: newPermission,
+      success: true,
+    }
+  }
+
+  async updatePermission(id, updates) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Updating Permission (mock)', { id, updates })
+    
+    const { mockUserRolePermissionData } = await import('../../data/userRolePermission.json')
+    const permission = mockUserRolePermissionData.permissions.find(p => p.id === parseInt(id))
+    
+    if (!permission) {
+      throw new Error('Permission not found')
+    }
+    
+    const updatedPermission = {
+      ...permission,
+      ...updates
+    }
+    
+    return {
+      data: updatedPermission,
+      success: true,
+    }
+  }
+
+  async deletePermission(id) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Deleting Permission (mock)', { id })
+    
+    return {
+      success: true,
+    }
+  }
+
+  async assignRoleToUser(userId, roleId) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Assigning Role to User (mock)', { userId, roleId })
+    
+    return {
+      success: true,
+    }
+  }
+
+  async removeRoleFromUser(userId, roleId) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Removing Role from User (mock)', { userId, roleId })
+    
+    return {
+      success: true,
+    }
+  }
+
+  async assignPermissionToRole(roleId, permissionId) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Assigning Permission to Role (mock)', { roleId, permissionId })
+    
+    return {
+      success: true,
+    }
+  }
+
+  async removePermissionFromRole(roleId, permissionId) {
+    if (!this.isEnabled) return null
+    
+    await mockDelay()
+    logger.debug('Removing Permission from Role (mock)', { roleId, permissionId })
+    
+    return {
+      success: true,
+    }
+  }
 }
 
 export const mockService = new MockService()

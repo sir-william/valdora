@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-09-22
+
+### 🎉 Nouvelles Fonctionnalités Majeures
+- **User Role & Permission Management**: Système complet de gestion des utilisateurs, rôles et permissions
+- **Interface d'Administration**: Module intégré accessible via `/admin/user-management`
+- **Gestion des Utilisateurs**: CRUD complet avec assignation de rôles multiples
+- **Système de Rôles**: Hiérarchie à trois niveaux (platform, tenant, user) avec priorités
+- **Contrôle des Permissions**: Gestion granulaire des autorisations par catégories et actions
+- **Auto-Détection Navigation**: Intégration automatique dans la sidebar VALDORA
+
+### 🏗️ Architecture et Intégration
+- **RTK Query API**: Nouvelle API slice `userRolePermissionApi` avec endpoints complets
+- **Redux Store**: Intégration dans le store principal avec middleware approprié
+- **Mock Service**: Service de données de test pour le développement
+- **Feature Flags**: Activation/désactivation via `NEXT_PUBLIC_FEATURE_USER_ROLE_PERMISSION`
+
+### 🎨 Interface Utilisateur
+- **Navigation par Onglets**: Interface intuitive avec trois sections principales
+- **Recherche Avancée**: Filtres multiples et recherche textuelle
+- **Tableaux Interactifs**: Pagination, tri, et actions contextuelles
+- **Formulaires Validés**: Validation Zod avec React Hook Form
+- **Design Responsive**: Adaptation parfaite à tous les écrans
+
+### 🔒 Sécurité et Validation
+- **RBAC Implementation**: Contrôle d'accès basé sur les rôles
+- **Validation Client/Serveur**: Double validation avec Zod
+- **Permissions Granulaires**: Contrôle fin des autorisations
+- **Sanitisation des Données**: Protection contre les injections
+
+### 📊 Métriques et Monitoring
+- **Tableaux de Bord**: Statistiques en temps réel pour chaque section
+- **Indicateurs Visuels**: Cartes métriques avec données agrégées
+- **États Visuels**: Chips colorés pour statuts et niveaux
+- **Feedback Utilisateur**: Messages d'erreur et confirmations
+
+### 🛠️ Composants Techniques
+- **UserRolePermissionManagement**: Composant principal avec navigation
+- **UserList/UserDetail/UserForm**: Gestion complète des utilisateurs
+- **RoleList**: Interface de gestion des rôles avec permissions
+- **PermissionList**: Catalogue des permissions par catégories
+- **API Integration**: Endpoints RESTful avec gestion d'erreurs
+
+### 📚 Documentation
+- **Guide Développeur**: Documentation technique complète
+- **Rapport de Tests**: Tests fonctionnels avec 100% d'acceptance
+- **Guide d'Utilisation**: Instructions pour administrateurs
+- **API Documentation**: Spécifications des endpoints
+
+### 🔧 Configuration
+- **Variables d'Environnement**: Configuration flexible via .env
+- **Dépendances**: Ajout de react-hook-form, @hookform/resolvers, zod
+- **Build Optimization**: Bundle optimisé (23 kB pour le module)
+- **Performance**: Temps de chargement < 2s
+
 ## [1.0.1] - 2025-09-22
 
 ### 🐛 Corrections Critiques

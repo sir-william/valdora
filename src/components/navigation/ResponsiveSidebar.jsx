@@ -226,16 +226,21 @@ const ResponsiveSidebar = ({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header avec toggle */}
       <Box sx={{ 
-        p: 2, 
+        p: collapsed && !isMobile ? 1 : 2, 
         borderBottom: '1px solid', 
         borderColor: 'divider',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
+        minHeight: 72,
+        transition: 'all 0.3s ease-in-out'
       }}>
+        {/* Logo et titre - cachés en mode collapsed */}
         <Box sx={{ 
           opacity: collapsed && !isMobile ? 0 : 1,
-          transition: 'opacity 0.2s ease-in-out'
+          transition: 'opacity 0.2s ease-in-out',
+          overflow: 'hidden',
+          width: collapsed && !isMobile ? 0 : 'auto'
         }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             VALDORA
@@ -245,8 +250,9 @@ const ResponsiveSidebar = ({
           </Typography>
         </Box>
         
+        {/* Bouton toggle - toujours visible */}
         {!isMobile && onToggleCollapse && (
-          <Tooltip title={collapsed ? 'Élargir' : 'Rétrécir'} arrow>
+          <Tooltip title={collapsed ? 'Élargir' : 'Rétrécir'} arrow placement="right">
             <IconButton 
               onClick={() => onToggleCollapse(!collapsed)}
               size="small"
@@ -257,7 +263,13 @@ const ResponsiveSidebar = ({
                   backgroundColor: 'primary.main',
                   transform: 'scale(1.1)'
                 },
-                transition: 'all 0.2s ease-in-out'
+                transition: 'all 0.2s ease-in-out',
+                zIndex: 1000,
+                // En mode collapsed, le bouton est centré
+                ...(collapsed && !isMobile && {
+                  position: 'relative',
+                  margin: 'auto'
+                })
               }}
             >
               {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}

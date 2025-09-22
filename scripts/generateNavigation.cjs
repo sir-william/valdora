@@ -66,8 +66,8 @@ class NavigationGenerator {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
       
-      // Recherche du pattern navigationConfig
-      const configMatch = content.match(/export\s+const\s+navigationConfig\s*=\s*({[\s\S]*?});/);
+      // Recherche du pattern navigationConfig (avec ou sans point-virgule)
+      const configMatch = content.match(/export\s+const\s+navigationConfig\s*=\s*({[\s\S]*?})\s*;?\s*(?=\n|$|import|export)/);
       if (!configMatch) return null;
 
       // Parse de la configuration

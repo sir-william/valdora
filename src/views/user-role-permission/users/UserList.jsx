@@ -54,6 +54,7 @@ export const navigationConfig = {
   enabled: true,
   section: 'Administration',
   label: 'Gestion des Utilisateurs',
+  href: '/admin/user-management',
   icon: 'tabler-users',
   order: 300,
   permissions: ['user.read.all', 'user.manage.all'],

@@ -50,6 +50,13 @@ const autoDetectedNavigation = [
           { label: 'Liste des tenants', href: '/admin/tenants' },
           { label: 'Nouveau tenant', href: '/admin/tenants/new' }
         ]
+      },
+      { 
+        label: 'Gestion Utilisateurs', 
+        href: '/admin/user-management', 
+        icon: <AdminIcon />, 
+        enabled: true,
+        badge: 'Auto-détecté'
       }
     ]
   },

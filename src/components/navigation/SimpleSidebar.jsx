@@ -86,13 +86,14 @@ const autoDetectedNavigation = [
   }
 ]
 
-const SimpleSidebar = ({ open = true, onClose }) => {
+const SimpleSidebar = ({ open = true, onClose, mobileOpen = false, onMobileClose }) => {
   const router = useRouter()
   const [expandedSections, setExpandedSections] = useState({})
 
   const handleNavigation = (href) => {
     router.push(href)
     if (onClose) onClose()
+    if (onMobileClose) onMobileClose()
   }
 
   const toggleSection = (sectionName) => {
@@ -182,22 +183,8 @@ const SimpleSidebar = ({ open = true, onClose }) => {
     </Box>
   )
 
-  return (
-    <Drawer
-      variant="permanent"
-      open={open}
-      sx={{
-        width: DRAWER_WIDTH,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
-          boxSizing: 'border-box',
-          backgroundColor: 'background.paper',
-          borderRight: '1px solid',
-          borderColor: 'divider'
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       {/* Header */}
       <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
@@ -222,7 +209,51 @@ const SimpleSidebar = ({ open = true, onClose }) => {
           </Typography>
         </Box>
       </Box>
-    </Drawer>
+    </>
+  )
+
+  return (
+    <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
+      {/* Mobile drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onMobileClose}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: DRAWER_WIDTH,
+            backgroundColor: 'background.paper',
+            borderRight: '1px solid',
+            borderColor: 'divider'
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+      
+      {/* Desktop drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', sm: 'block' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: DRAWER_WIDTH,
+            backgroundColor: 'background.paper',
+            borderRight: '1px solid',
+            borderColor: 'divider'
+          },
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
+    </Box>
   )
 }
 

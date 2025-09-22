@@ -43,6 +43,12 @@ const verticalMenuData = () => [
     ]
   },
   {
+    label: 'Gestion Utilisateurs',
+    href: '/admin/user-management',
+    icon: 'tabler-users-group',
+    badge: { label: 'Auto-détecté', color: 'success' }
+  },
+  {
     label: 'About',
     href: '/about',
     icon: 'tabler-info-circle'

@@ -1,5 +1,17 @@
 'use client'
 
+// Configuration pour l'auto-détection de navigation
+export const navigationConfig = {
+  enabled: true,
+  section: 'Administration',
+  label: 'Gestion Utilisateurs',
+  icon: 'tabler-users-group',
+  order: 150,
+  permissions: ['admin'],
+  featureFlag: 'USER_ROLE_PERMISSION',
+  badge: { label: 'Auto-détecté', color: 'success' }
+}
+
 import React, { useState } from 'react'
 import {
   Box,
@@ -22,16 +34,7 @@ import UserForm from './users/UserForm'
 import RoleList from './roles/RoleList'
 import PermissionList from './permissions/PermissionList'
 
-// Navigation configuration for auto-detection
-export const navigationConfig = {
-  enabled: true,
-  section: 'Administration',
-  label: 'Utilisateurs & Permissions',
-  icon: 'tabler-users-group',
-  order: 290,
-  permissions: ['user.read.all', 'role.read.all', 'permission.read.all'],
-  featureFlag: 'USER_ROLE_PERMISSION'
-}
+
 
 const UserRolePermissionManagement = () => {
   const [activeTab, setActiveTab] = useState(0)

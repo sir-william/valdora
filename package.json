@@ -28,6 +28,7 @@
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
     "@mui/material-nextjs": "^7.3.2",
+    "@mui/x-charts": "^8.11.3",
     "@mui/x-data-grid": "^7.22.2",
     "@prisma/client": "^5.19.0",
     "@reduxjs/toolkit": "^2.9.0",
@@ -45,7 +46,7 @@
     "react-redux": "^9.2.0",
     "react-toastify": "^10.0.6",
     "react-use": "^17.6.0",
-    "recharts": "^2.12.0",
+    "recharts": "^2.15.4",
     "server-only": "^0.0.1",
     "zod": "^3.25.76"
   },

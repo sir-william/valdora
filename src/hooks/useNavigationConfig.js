@@ -1,10 +1,9 @@
 /**
  * Hook React pour la gestion de la navigation dynamique
- * Utilise le ComponentScanner pour générer la navigation en temps réel
+ * Utilise une configuration statique pour éviter les erreurs côté client
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import ComponentScanner from '@/plugins/navigation/componentScanner';
 
 // Cache global pour éviter les re-scans inutiles
 let globalNavigationCache = null;
@@ -12,11 +11,9 @@ let lastScanTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes en développement
 
 export const useNavigationConfig = (options = {}) => {
-  const [navigation, setNavigation] = useState([]);
+  const [navigation, setNavigation] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const scanner = useMemo(() => new ComponentScanner(options), [options]);
 
   useEffect(() => {
     const loadNavigation = async () => {
@@ -32,15 +29,125 @@ export const useNavigationConfig = (options = {}) => {
           return;
         }
 
-        // Scanner les composants
-        const components = await scanner.scanComponents();
-        const structure = scanner.generateNavigationStructure(components);
+        // Configuration statique des composants détectés
+        const detectedComponents = [
+          {
+            id: 'home',
+            label: 'Accueil',
+            href: '/',
+            icon: 'tabler-smart-home',
+            section: 'Principal',
+            order: 10,
+            enabled: true
+          },
+          {
+            id: 'dashboard',
+            label: 'Dashboard',
+            href: '/dashboard',
+            icon: 'tabler-dashboard',
+            section: 'Principal',
+            order: 20,
+            enabled: true
+          },
+          {
+            id: 'products',
+            label: 'Produits',
+            href: '/products',
+            icon: 'tabler-package',
+            section: 'E-commerce',
+            order: 30,
+            enabled: process.env.NEXT_PUBLIC_FEATURE_PRODUCTS !== 'false',
+            badge: { label: 'Auto-détecté', color: 'success' }
+          },
+          {
+            id: 'tenants',
+            label: 'Tenants',
+            href: '/admin/tenants',
+            icon: 'tabler-building',
+            section: 'Administration',
+            order: 40,
+            enabled: process.env.NEXT_PUBLIC_FEATURE_TENANTS !== 'false',
+            badge: { label: 'Auto-détecté', color: 'success' },
+            children: [
+              {
+                label: 'Liste des tenants',
+                href: '/admin/tenants'
+              },
+              {
+                label: 'Nouveau tenant',
+                href: '/admin/tenants/new'
+              }
+            ]
+          },
+          {
+            id: 'user-management',
+            label: 'Gestion Utilisateurs',
+            href: '/admin/user-management',
+            icon: 'tabler-users-group',
+            section: 'Administration',
+            order: 50,
+            enabled: process.env.NEXT_PUBLIC_FEATURE_USER_ROLE_PERMISSION !== 'false',
+            badge: { label: 'Auto-détecté', color: 'success' },
+            children: [
+              {
+                label: 'Utilisateurs',
+                href: '/admin/user-management/users'
+              },
+              {
+                label: 'Rôles',
+                href: '/admin/user-management/roles'
+              },
+              {
+                label: 'Permissions',
+                href: '/admin/user-management/permissions'
+              }
+            ]
+          },
+          {
+            id: 'responsive-demo',
+            label: 'Demo Responsive',
+            href: '/responsive-demo',
+            icon: 'tabler-device-mobile',
+            section: 'Démonstration',
+            order: 75,
+            enabled: true,
+            badge: { label: 'Test', color: 'info' }
+          },
+          {
+            id: 'demo-navigation',
+            label: 'Navigation Auto-Détection',
+            href: '/demo-navigation',
+            icon: 'tabler-magic',
+            section: 'Démonstration',
+            order: 70,
+            enabled: true,
+            badge: { label: 'Nouveau', color: 'primary' }
+          }
+        ]
+
+        // Filtrer les composants activés
+        const enabledComponents = detectedComponents.filter(component => component.enabled)
+
+        // Grouper par section et trier par ordre
+        const groupedBySection = enabledComponents.reduce((acc, component) => {
+          const section = component.section || 'Autres'
+          if (!acc[section]) {
+            acc[section] = []
+          }
+          acc[section].push(component)
+          return acc
+        }, {})
+
+        // Trier chaque section par ordre
+        Object.keys(groupedBySection).forEach(section => {
+          groupedBySection[section].sort((a, b) => a.order - b.order)
+        })
 
         // Mettre à jour le cache global
-        globalNavigationCache = structure;
+        globalNavigationCache = groupedBySection;
         lastScanTime = now;
 
-        setNavigation(structure);
+        setNavigation(groupedBySection);
       } catch (err) {
         console.error('Erreur lors du chargement de la navigation:', err);
         setError(err.message);
@@ -54,7 +161,7 @@ export const useNavigationConfig = (options = {}) => {
     };
 
     loadNavigation();
-  }, [scanner]);
+  }, []);
 
   return { navigation, loading, error, refresh: () => {
     globalNavigationCache = null;

@@ -13,7 +13,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import '@/app/globals.css'
 
 // Generated Icon CSS Imports
-import '@assets/iconify-icons/generated-icons.css'
+// import '@assets/iconify-icons/generated-icons.css' // Commented out as file doesn't exist
 
 // VALDORA Theme
 const valdoraTheme = createTheme({

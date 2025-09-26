@@ -440,3 +440,14 @@ const AiGenerationPage = () => {
 }
 
 export default AiGenerationPage
+
+// Configuration pour la navigation automatique
+export const navigationConfig = {
+  label: 'Génération IA',
+  icon: 'tabler-magic',
+  section: 'Intelligence Artificielle',
+  order: 15,
+  enabled: true,
+  permissions: ['user', 'admin'],
+  description: 'Créez des boutiques en ligne avec l\'intelligence artificielle'
+}

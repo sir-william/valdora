@@ -299,3 +299,14 @@ const ApiTestPage = () => {
 }
 
 export default ApiTestPage
+
+// Configuration pour la navigation automatique
+export const navigationConfig = {
+  label: 'Test API',
+  icon: 'tabler-flask',
+  section: 'Développement',
+  order: 80,
+  enabled: true,
+  permissions: ['admin', 'developer'],
+  description: 'Test de connectivité et authentification API'
+}

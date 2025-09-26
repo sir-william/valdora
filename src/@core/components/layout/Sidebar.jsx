@@ -54,7 +54,6 @@ const menuItems = [
     icon: AutoAwesome,
     path: '/ai-generation',
     badge: null,
-    featureFlag: 'AI_GENERATION',
   },
   {
     id: 'analytics',
@@ -62,7 +61,6 @@ const menuItems = [
     icon: Analytics,
     path: '/analytics',
     badge: null,
-    featureFlag: 'ANALYTICS',
   },
   {
     id: 'stores',
@@ -70,7 +68,6 @@ const menuItems = [
     icon: Store,
     path: '/stores',
     badge: null,
-    featureFlag: 'AI_DRAFTS',
     children: [
       {
         id: 'ai-drafts',
@@ -78,7 +75,6 @@ const menuItems = [
         icon: AutoAwesome,
         path: '/ai-drafts',
         badge: 3,
-        featureFlag: 'AI_DRAFTS',
       },
       {
         id: 'active-stores',
@@ -95,7 +91,6 @@ const menuItems = [
     icon: ShoppingCart,
     path: '/orders',
     badge: 5,
-    featureFlag: 'ORDERS',
   },
   {
     id: 'products',
@@ -103,7 +98,6 @@ const menuItems = [
     icon: Inventory,
     path: '/products',
     badge: null,
-    featureFlag: 'PRODUCTS',
   },
   {
     id: 'tenants',
@@ -111,7 +105,6 @@ const menuItems = [
     icon: Store,
     path: '/tenants',
     badge: null,
-    featureFlag: 'TENANTS',
   },
   {
     id: 'users',
@@ -119,7 +112,6 @@ const menuItems = [
     icon: Person,
     path: '/users',
     badge: null,
-    featureFlag: 'USER_MANAGEMENT',
   },
   {
     id: 'api-test',
@@ -127,7 +119,6 @@ const menuItems = [
     icon: Settings,
     path: '/api-test',
     badge: null,
-    featureFlag: 'API_TEST',
   },
   {
     id: 'admin',
@@ -152,28 +143,8 @@ const Sidebar = ({ open, onToggle }) => {
   const pathname = usePathname()
   const [expandedItems, setExpandedItems] = useState({})
 
-  // Filtrer les éléments de menu selon les feature flags
-  const filterMenuItems = (items) => {
-    return items.filter(item => {
-      // Si l'item a un feature flag, vérifier s'il est activé
-      if (item.featureFlag && !isFeatureEnabled(item.featureFlag)) {
-        return false
-      }
-      
-      // Filtrer récursivement les enfants
-      if (item.children) {
-        item.children = filterMenuItems(item.children)
-        // Si tous les enfants sont filtrés et que l'item parent n'a pas de path propre, le cacher
-        if (item.children.length === 0 && !item.path) {
-          return false
-        }
-      }
-      
-      return true
-    })
-  }
-
-  const filteredMenuItems = filterMenuItems([...menuItems])
+  // Afficher tous les éléments de menu (feature flags désactivés temporairement)
+  const filteredMenuItems = [...menuItems]
 
   const handleItemClick = (item) => {
     if (item.children) {

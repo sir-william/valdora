@@ -578,3 +578,14 @@ const AnalyticsPage = () => {
 }
 
 export default AnalyticsPage
+
+// Configuration pour la navigation automatique
+export const navigationConfig = {
+  label: 'Analytics',
+  icon: 'tabler-chart-line',
+  section: 'Analytics & Reporting',
+  order: 25,
+  enabled: true,
+  permissions: ['user', 'admin'],
+  description: 'Tableaux de bord et analyses avancées avec Recharts'
+}

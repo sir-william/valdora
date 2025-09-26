@@ -445,3 +445,14 @@ const AiDraftsPage = () => {
 }
 
 export default AiDraftsPage
+
+// Configuration pour la navigation automatique
+export const navigationConfig = {
+  label: 'Brouillons IA',
+  icon: 'tabler-file-text',
+  section: 'Intelligence Artificielle',
+  order: 16,
+  enabled: true,
+  permissions: ['user', 'admin'],
+  description: 'Gérez vos brouillons de boutiques générées par IA'
+}

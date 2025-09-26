@@ -355,3 +355,14 @@ const FeatureFlagsPage = () => {
 }
 
 export default FeatureFlagsPage
+
+// Configuration pour la navigation automatique
+export const navigationConfig = {
+  label: 'Feature Flags',
+  icon: 'tabler-settings',
+  section: 'Administration',
+  order: 90,
+  enabled: true,
+  permissions: ['admin'],
+  description: 'Gestion des fonctionnalités et feature flags'
+}

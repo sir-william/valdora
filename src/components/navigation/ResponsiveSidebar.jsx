@@ -215,7 +215,7 @@ const ResponsiveSidebar = ({
       )}
       
       <List dense>
-        {items.map(item => renderNavigationItem(item))}
+        {Array.isArray(items) && items.map(item => renderNavigationItem(item))}
       </List>
       
       {(!collapsed || isMobile) && <Divider sx={{ mx: 2, my: 1 }} />}
@@ -310,8 +310,8 @@ const ResponsiveSidebar = ({
           </Box>
         )}
         
-        {!loading && !error && navigation && Object.keys(navigation).map(sectionName => 
-          renderSection(sectionName, navigation[sectionName])
+        {!loading && !error && navigation && Array.isArray(navigation) && navigation.map(section => 
+          renderSection(section.sectionTitle, section.items)
         )}
       </Box>
 

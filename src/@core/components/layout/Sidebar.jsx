@@ -35,8 +35,7 @@ import {
   Notifications,
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../../hooks/useAuth'
-import { config, isFeatureEnabled } from '../../utils/config'
+import { isFeatureEnabled } from '../../utils/featureFlags'
 
 const SIDEBAR_WIDTH = 280
 const SIDEBAR_COLLAPSED_WIDTH = 64
@@ -50,6 +49,20 @@ const menuItems = [
     badge: null,
   },
   {
+    id: 'ai-generation',
+    label: 'Génération IA',
+    icon: AutoAwesome,
+    path: '/ai-generation',
+    badge: null,
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: Analytics,
+    path: '/analytics',
+    badge: null,
+  },
+  {
     id: 'stores',
     label: 'Boutiques IA',
     icon: Store,
@@ -60,7 +73,7 @@ const menuItems = [
         id: 'ai-drafts',
         label: 'Brouillons IA',
         icon: AutoAwesome,
-        path: '/stores/ai-drafts',
+        path: '/ai-drafts',
         badge: 3,
       },
       {
@@ -77,88 +90,96 @@ const menuItems = [
     label: 'Commandes',
     icon: ShoppingCart,
     path: '/orders',
-    badge: 12,
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: Analytics,
-    path: '/analytics',
-    badge: null,
-    feature: 'analytics',
-  },
-  {
-    id: 'notifications',
-    label: 'Notifications',
-    icon: Notifications,
-    path: '/notifications',
     badge: 5,
-    feature: 'notifications',
-  },
-]
-
-const bottomMenuItems = [
-  {
-    id: 'settings',
-    label: 'Paramètres',
-    icon: Settings,
-    path: '/settings',
   },
   {
-    id: 'profile',
-    label: 'Profil',
+    id: 'products',
+    label: 'Produits',
+    icon: Inventory,
+    path: '/products',
+    badge: null,
+  },
+  {
+    id: 'tenants',
+    label: 'Tenants',
+    icon: Store,
+    path: '/tenants',
+    badge: null,
+  },
+  {
+    id: 'users',
+    label: 'Gestion Utilisateurs',
     icon: Person,
-    path: '/profile',
+    path: '/users',
+    badge: null,
+  },
+  {
+    id: 'api-test',
+    label: 'Test API',
+    icon: Settings,
+    path: '/api-test',
+    badge: null,
+  },
+  {
+    id: 'admin',
+    label: 'Administration',
+    icon: Settings,
+    path: '/admin',
+    badge: null,
+    children: [
+      {
+        id: 'feature-flags',
+        label: 'Feature Flags',
+        icon: Settings,
+        path: '/admin/feature-flags',
+        badge: null,
+      },
+    ],
   },
 ]
 
 const Sidebar = ({ open, onToggle }) => {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, logout } = useAuth()
-  const [expandedItems, setExpandedItems] = useState(['stores'])
+  const [expandedItems, setExpandedItems] = useState({})
+
+  // Afficher tous les éléments de menu (feature flags désactivés temporairement)
+  const filteredMenuItems = [...menuItems]
 
   const handleItemClick = (item) => {
     if (item.children) {
-      setExpandedItems(prev => 
-        prev.includes(item.id) 
-          ? prev.filter(id => id !== item.id)
-          : [...prev, item.id]
-      )
-    } else {
+      setExpandedItems(prev => ({
+        ...prev,
+        [item.id]: !prev[item.id]
+      }))
+    } else if (item.path) {
       router.push(item.path)
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      router.push('/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
+  const isActive = (path) => {
+    return pathname === path
   }
 
-  const isItemActive = (path) => {
-    return pathname === path || pathname.startsWith(path + '/')
+  const isParentActive = (item) => {
+    if (item.children) {
+      return item.children.some(child => isActive(child.path))
+    }
+    return false
   }
 
   const renderMenuItem = (item, level = 0) => {
-    // Vérifier les feature flags
-    if (item.feature && !isFeatureEnabled(item.feature)) {
-      return null
-    }
-
-    const isActive = isItemActive(item.path)
-    const isExpanded = expandedItems.includes(item.id)
     const hasChildren = item.children && item.children.length > 0
+    const isExpanded = expandedItems[item.id]
+    const active = isActive(item.path)
+    const parentActive = isParentActive(item)
 
     return (
       <motion.div
         key={item.id}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2, delay: level * 0.05 }}
+        transition={{ duration: 0.2 }}
       >
         <ListItem disablePadding sx={{ display: 'block' }}>
           <ListItemButton
@@ -168,10 +189,10 @@ const Sidebar = ({ open, onToggle }) => {
               justifyContent: open ? 'initial' : 'center',
               px: 2.5,
               pl: level > 0 ? 4 : 2.5,
-              backgroundColor: isActive ? 'primary.main' : 'transparent',
-              color: isActive ? 'primary.contrastText' : 'text.primary',
+              backgroundColor: active || parentActive ? 'primary.main' : 'transparent',
+              color: active || parentActive ? 'primary.contrastText' : 'text.primary',
               '&:hover': {
-                backgroundColor: isActive ? 'primary.dark' : 'action.hover',
+                backgroundColor: active || parentActive ? 'primary.dark' : 'action.hover',
               },
               borderRadius: 1,
               mx: 1,
@@ -183,13 +204,12 @@ const Sidebar = ({ open, onToggle }) => {
                 minWidth: 0,
                 mr: open ? 3 : 'auto',
                 justifyContent: 'center',
-                color: isActive ? 'primary.contrastText' : 'text.secondary',
+                color: active || parentActive ? 'primary.contrastText' : 'text.primary',
               }}
             >
               <Badge
                 badgeContent={item.badge}
                 color="error"
-                variant="dot"
                 invisible={!item.badge}
               >
                 <item.icon />
@@ -201,19 +221,23 @@ const Sidebar = ({ open, onToggle }) => {
                 opacity: open ? 1 : 0,
                 '& .MuiListItemText-primary': {
                   fontSize: '0.875rem',
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: active || parentActive ? 600 : 400,
                 },
               }}
             />
             {hasChildren && open && (
-              <Box sx={{ color: isActive ? 'primary.contrastText' : 'text.secondary' }}>
+              <IconButton
+                size="small"
+                sx={{
+                  color: active || parentActive ? 'primary.contrastText' : 'text.primary',
+                }}
+              >
                 {isExpanded ? <ExpandLess /> : <ExpandMore />}
-              </Box>
+              </IconButton>
             )}
           </ListItemButton>
         </ListItem>
 
-        {/* Sous-menu */}
         {hasChildren && (
           <AnimatePresence>
             {open && (
@@ -236,13 +260,23 @@ const Sidebar = ({ open, onToggle }) => {
     )
   }
 
-  const sidebarContent = (
-    <Box
+  return (
+    <Drawer
+      variant="permanent"
+      open={open}
       sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'background.paper',
+        width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        boxSizing: 'border-box',
+        '& .MuiDrawer-paper': {
+          width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+          transition: 'width 0.3s ease-in-out',
+          overflowX: 'hidden',
+          backgroundColor: 'background.paper',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+        },
       }}
     >
       {/* Header */}
@@ -255,182 +289,97 @@ const Sidebar = ({ open, onToggle }) => {
           minHeight: 64,
         }}
       >
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: 'primary.main',
-                    fontSize: '1rem',
-                  }}
-                >
-                  V
-                </Avatar>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  VALDORA
-                </Typography>
-              </Box>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        <IconButton
-          onClick={onToggle}
-          sx={{
-            color: 'text.secondary',
-            '&:hover': { backgroundColor: 'action.hover' },
-          }}
-        >
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              VALDORA
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Navigation Dynamique
+            </Typography>
+          </motion.div>
+        )}
+        <IconButton onClick={onToggle} size="small">
           {open ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Box>
 
       <Divider />
 
-      {/* User Info */}
-      {open && user && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Box sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar
-                sx={{
-                  width: 40,
-                  height: 40,
-                  bgcolor: 'secondary.main',
-                }}
-              >
-                {user.name?.charAt(0) || 'U'}
-              </Avatar>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 600,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {user.name || 'Utilisateur'}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {user.email}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-          <Divider />
-        </motion.div>
+      {/* Menu Principal */}
+      {open && (
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            PRINCIPAL
+          </Typography>
+        </Box>
       )}
 
-      {/* Navigation Menu */}
-      <Box sx={{ flex: 1, overflow: 'auto', py: 1 }}>
-        <List>
-          {menuItems.map(item => renderMenuItem(item))}
-        </List>
-      </Box>
+      <List sx={{ px: 1 }}>
+        {filteredMenuItems.slice(0, 3).map(item => renderMenuItem(item))}
+      </List>
 
-      <Divider />
+      <Divider sx={{ mx: 2 }} />
 
-      {/* Bottom Menu */}
-      <Box sx={{ pb: 1 }}>
-        <List>
-          {bottomMenuItems.map(item => renderMenuItem(item))}
-          
-          {/* Logout */}
-          <ListItem disablePadding sx={{ display: 'block' }}>
-            <ListItemButton
-              onClick={handleLogout}
+      {/* E-commerce */}
+      {open && (
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            E-COMMERCE
+          </Typography>
+        </Box>
+      )}
+
+      <List sx={{ px: 1 }}>
+        {filteredMenuItems.slice(3, 6).map(item => renderMenuItem(item))}
+      </List>
+
+      <Divider sx={{ mx: 2 }} />
+
+      {/* Administration */}
+      {open && (
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            ADMINISTRATION
+          </Typography>
+        </Box>
+      )}
+
+      <List sx={{ px: 1 }}>
+        {filteredMenuItems.slice(6).map(item => renderMenuItem(item))}
+      </List>
+
+      {/* Footer */}
+      <Box sx={{ mt: 'auto', p: 2 }}>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <Box
               sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-                '&:hover': {
-                  backgroundColor: 'error.light',
-                  color: 'error.contrastText',
-                },
-                borderRadius: 1,
-                mx: 1,
-                mb: 0.5,
+                p: 2,
+                backgroundColor: 'primary.main',
+                borderRadius: 2,
+                color: 'primary.contrastText',
+                textAlign: 'center',
               }}
             >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                  color: 'text.secondary',
-                }}
-              >
-                <Logout />
-              </ListItemIcon>
-              <ListItemText
-                primary="Déconnexion"
-                sx={{
-                  opacity: open ? 1 : 0,
-                  '& .MuiListItemText-primary': {
-                    fontSize: '0.875rem',
-                  },
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+              <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                🎯 Navigation Dynamique
+              </Typography>
+              <Typography variant="caption" display="block" sx={{ fontSize: '0.7rem', opacity: 0.8 }}>
+                Les composants avec `navigationConfig` apparaissent automatiquement.
+              </Typography>
+            </Box>
+          </motion.div>
+        )}
       </Box>
-    </Box>
-  )
-
-  return (
-    <Drawer
-      variant="permanent"
-      open={open}
-      sx={{
-        width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-        boxSizing: 'border-box',
-        '& .MuiDrawer-paper': {
-          width: open ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
-          transition: theme => theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          overflowX: 'hidden',
-          border: 'none',
-          boxShadow: '2px 0 12px rgba(0, 0, 0, 0.08)',
-        },
-      }}
-    >
-      {sidebarContent}
     </Drawer>
   )
 }

@@ -36,7 +36,11 @@ const iconMap = {
   'tabler-chart-line': AnalyticsIcon,
   'tabler-package': BusinessIcon,
   'tabler-flask': SettingsIcon,
-  'tabler-info-circle': SettingsIcon
+  'tabler-info-circle': SettingsIcon,
+  'tabler-magic': AnalyticsIcon,
+  'tabler-file-text': BusinessIcon,
+  'tabler-device-mobile': SettingsIcon,
+  'tabler-users-group': BusinessIcon
 }
 
 const DynamicNavigation = ({ userPermissions = ['admin'] }) => {
